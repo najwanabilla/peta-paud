@@ -1,61 +1,67 @@
-<<<<<<< HEAD
+# Logs
 *.log
+npm-debug.log
+yarn-error.log
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Environment
 .env
 .env.*
 !.env.example
-.phpactor.json
-.phpunit.result.cache
-/.codex
-/.cursor/
+.env.backup
+.env.production
+
+# IDE
 /.idea
-/.nova
-/.phpunit.cache
 /.vscode
+/.nova
 /.zed
-/auth.json
-/node_modules
+/.fleet
+.phpactor.json
+_ide_helper.php
+.auth.json
+auth.json
+
+# PHP / Laravel
+.phpunit.result.cache
+/.phpunit.cache
+/storage/*.key
+/storage/pail
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
-/storage/*.key
-/storage/pail
-/vendor
-_ide_helper.php
-Homestead.json
-Homestead.yaml
-Thumbs.db
-=======
-/vendor/
-node_modules/
-npm-debug.log
-yarn-error.log
 
 # Laravel 4 specific
 bootstrap/compiled.php
 app/storage/
 
-# Laravel 5 & Lumen specific
+# Laravel with changed public path
+public_html/storage
+public_html/hot
 public/storage
 public/hot
 
-# Laravel 5 & Lumen specific with changed public path
-public_html/storage
-public_html/hot
+# Dependencies
+/vendor
+/vendor/
+/node_modules
+node_modules/
+npm-debug.log
+yarn-error.log
 
-storage/*.key
-.env
-Homestead.yaml
+# Homestead / Vagrant
 Homestead.json
+Homestead.yaml
 /.vagrant
-.phpunit.result.cache
-/.phpunit.cache
 
-/public/build
-/storage/pail
-.env.backup
-.env.production
-.phpactor.json
-auth.json
->>>>>>> 5332df3213152266eddbfedffeb6f37902cacf0c
+# Kodex / Cursor
+/.codex
+/.cursor/
+
+# Database backup
+*.sql
+backup_*.sql
