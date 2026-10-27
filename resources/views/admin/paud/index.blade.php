@@ -3,135 +3,312 @@
 @section('judul', 'Data PAUD')
 
 @section('isi')
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p class="text-slate-600">{{ number_format($daftar->total(), 0, ',', '.') }} data ditemukan.</p>
-        <a href="{{ route('admin.paud.create') }}"
-           class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-700">
-            <i class="fa-solid fa-plus"></i> Tambah PAUD
-        </a>
-    </div>
+    @php
+        $adaImpor = \Illuminate\Support\Facades\Route::has('admin.impor.index');
+        $jenisSatuan = \App\Models\Paud::JENIS_SATUAN;
 
-    {{-- Pencarian dan filter --}}
-    <form method="GET" action="{{ route('admin.paud.index') }}"
-          class="mb-4 grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 md:grid-cols-2 lg:grid-cols-4">
+        $namaKecamatanDipilih = filled(request('kecamatan'))
+            ? optional($kecamatans->firstWhere('id', (int) request('kecamatan')))->nama
+            : null;
+
+        $labelKoordinat = [
+            'ada' => 'Sudah ada koordinat',
+            'belum' => 'Belum ada koordinat',
+        ];
+
+        $gayaInput = 'w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200';
+    @endphp
+
+    {{-- 1. Judul halaman dan tombol utama --}}
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-            <label for="q" class="mb-1 block text-sm font-medium">Cari</label>
-            <input id="q" name="q" type="search" value="{{ request('q') }}" placeholder="Nama, NPSN, alamat, kelurahan"
-                   class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200">
+            <p class="text-sm text-slate-500">
+                <span class="font-semibold text-slate-800">{{ number_format($daftar->total(), 0, ',', '.') }}</span>
+                data {{ $adaFilter ? 'sesuai pencarian' : 'PAUD tersimpan' }}
+            </p>
         </div>
-        <div>
-            <label for="kecamatan" class="mb-1 block text-sm font-medium">Kecamatan</label>
-            <select id="kecamatan" name="kecamatan"
-                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                <option value="">Semua kecamatan</option>
-                @foreach ($kecamatans as $k)
-                    <option value="{{ $k->id }}" @selected(request('kecamatan') == $k->id)>{{ $k->nama }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <label for="koordinat" class="mb-1 block text-sm font-medium">Koordinat</label>
-            <select id="koordinat" name="koordinat"
-                    class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                <option value="">Semua</option>
-                <option value="ada" @selected(request('koordinat') === 'ada')>Sudah ada koordinat</option>
-                <option value="belum" @selected(request('koordinat') === 'belum')>Belum ada koordinat</option>
-            </select>
-        </div>
-        <div class="flex items-end gap-2">
-            <button type="submit" class="flex-1 rounded-xl bg-sky-600 px-4 py-3 font-semibold text-white hover:bg-sky-700">
-                <i class="fa-solid fa-magnifying-glass mr-1"></i> Cari
-            </button>
-            @if ($adaFilter)
-                <a href="{{ route('admin.paud.index') }}" class="rounded-xl bg-slate-100 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-200">
-                    Reset
+
+        <div class="flex flex-wrap gap-2">
+            @if ($adaImpor)
+                <a href="{{ route('admin.impor.index') }}"
+                   class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50">
+                    <i class="fa-solid fa-file-excel text-emerald-600"></i> Impor Excel
                 </a>
             @endif
+            <a href="{{ route('admin.paud.create') }}"
+               class="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700">
+                <i class="fa-solid fa-plus"></i> Tambah PAUD
+            </a>
         </div>
+    </div>
+
+    {{-- 2. Pencarian dan filter --}}
+    <form method="GET" action="{{ route('admin.paud.index') }}" id="form-filter"
+          class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+        <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-12">
+            <div class="lg:col-span-5">
+                <label for="q" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Cari</label>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input id="q" name="q" type="search" value="{{ request('q') }}"
+                           placeholder="Nama, NPSN, alamat, atau kelurahan"
+                           class="{{ $gayaInput }} pl-11">
+                </div>
+            </div>
+
+            <div class="lg:col-span-3">
+                <label for="kecamatan" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Kecamatan</label>
+                <select id="kecamatan" name="kecamatan" data-auto-kirim class="{{ $gayaInput }}">
+                    <option value="">Semua kecamatan</option>
+                    @foreach ($kecamatans as $k)
+                        <option value="{{ $k->id }}" @selected((string) request('kecamatan') === (string) $k->id)>{{ $k->nama }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="lg:col-span-2">
+                <label for="koordinat" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Koordinat</label>
+                <select id="koordinat" name="koordinat" data-auto-kirim class="{{ $gayaInput }}">
+                    <option value="">Semua</option>
+                    <option value="ada" @selected(request('koordinat') === 'ada')>Sudah ada</option>
+                    <option value="belum" @selected(request('koordinat') === 'belum')>Belum ada</option>
+                </select>
+            </div>
+
+            <div class="flex items-end gap-2 lg:col-span-2">
+                <button type="submit"
+                        class="flex-1 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-sky-700">
+                    Cari
+                </button>
+                @if ($adaFilter)
+                    <a href="{{ route('admin.paud.index') }}"
+                       class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </div>
+
+        {{-- Filter yang sedang aktif --}}
+        @if ($adaFilter)
+            <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3 text-xs">
+                <span class="font-semibold text-slate-500">Filter aktif:</span>
+
+                @if (filled(request('q')))
+                    <a href="{{ request()->fullUrlWithQuery(['q' => null, 'page' => null]) }}"
+                       class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 font-medium text-sky-800 ring-1 ring-sky-200 hover:bg-sky-100">
+                        Kata: "{{ \Illuminate\Support\Str::limit(request('q'), 25) }}" <i class="fa-solid fa-xmark"></i>
+                    </a>
+                @endif
+
+                @if ($namaKecamatanDipilih)
+                    <a href="{{ request()->fullUrlWithQuery(['kecamatan' => null, 'page' => null]) }}"
+                       class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 font-medium text-sky-800 ring-1 ring-sky-200 hover:bg-sky-100">
+                        Kecamatan: {{ $namaKecamatanDipilih }} <i class="fa-solid fa-xmark"></i>
+                    </a>
+                @endif
+
+                @if (isset($labelKoordinat[request('koordinat')]))
+                    <a href="{{ request()->fullUrlWithQuery(['koordinat' => null, 'page' => null]) }}"
+                       class="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 font-medium text-sky-800 ring-1 ring-sky-200 hover:bg-sky-100">
+                        {{ $labelKoordinat[request('koordinat')] }} <i class="fa-solid fa-xmark"></i>
+                    </a>
+                @endif
+            </div>
+        @endif
     </form>
 
-    <div class="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-        <table class="w-full min-w-[56rem] text-left text-sm">
-            <thead class="bg-slate-100 text-slate-600">
-                <tr>
-                    <th class="px-4 py-3">Foto</th>
-                    <th class="px-4 py-3">Nama PAUD</th>
-                    <th class="px-4 py-3">NPSN</th>
-                    <th class="px-4 py-3">Kecamatan</th>
-                    <th class="px-4 py-3">Kelurahan</th>
-                    <th class="px-4 py-3">Koordinat</th>
-                    <th class="px-4 py-3 text-right">Tindakan</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($daftar as $p)
+    {{-- 3. Tabel (layar sedang ke atas) --}}
+    <div class="mt-5 hidden overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 md:block">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-[56rem] text-left text-sm">
+                <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                     <tr>
-                        <td class="px-4 py-3">
-                            @if ($p->fotoUtama)
-                                <img src="{{ $p->fotoUtama->url }}" alt="Foto {{ $p->nama }}" loading="lazy"
-                                     class="h-12 w-12 rounded-lg object-cover ring-1 ring-slate-200">
-                            @else
-                                <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
-                                    <i class="fa-regular fa-image"></i>
+                        <th class="w-12 px-4 py-3 text-center">No</th>
+                        <th class="px-4 py-3">PAUD</th>
+                        <th class="px-4 py-3">NPSN</th>
+                        <th class="px-4 py-3">Kecamatan</th>
+                        <th class="px-4 py-3">Kelurahan</th>
+                        <th class="px-4 py-3">Koordinat</th>
+                        <th class="px-4 py-3 text-right">Tindakan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($daftar as $p)
+                        <tr class="transition hover:bg-sky-50/40">
+                            <td class="px-4 py-3 text-center text-slate-400">{{ $daftar->firstItem() + $loop->index }}</td>
+
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    @if ($p->fotoUtama)
+                                        <img src="{{ $p->fotoUtama->url }}" alt="Foto {{ $p->nama }}" loading="lazy"
+                                             class="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-slate-200">
+                                    @else
+                                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                                            <i class="fa-regular fa-image"></i>
+                                        </span>
+                                    @endif
+
+                                    <div class="min-w-0">
+                                        <a href="{{ route('admin.paud.show', $p) }}"
+                                           class="block truncate font-semibold text-slate-800 hover:text-sky-700">{{ $p->nama }}</a>
+                                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                                            @if ($p->jenis_satuan)
+                                                <span title="{{ $jenisSatuan[$p->jenis_satuan] ?? $p->jenis_satuan }}"
+                                                      class="rounded-md bg-violet-100 px-2 py-0.5 text-[11px] font-bold text-violet-700">{{ $p->jenis_satuan }}</span>
+                                            @endif
+                                            @if ($p->status)
+                                                <span class="rounded-md px-2 py-0.5 text-[11px] font-bold {{ $p->status === 'Negeri' ? 'bg-sky-100 text-sky-700' : 'bg-amber-100 text-amber-700' }}">{{ $p->status }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="px-4 py-3 font-mono text-xs text-slate-600">{{ $p->npsn ?? '-' }}</td>
+
+                            <td class="px-4 py-3">
+                                <span class="inline-flex items-center gap-2 whitespace-nowrap">
+                                    <span class="h-3 w-3 rounded-full ring-1 ring-slate-300" style="background-color: {{ $p->kecamatan->warna }}"></span>
+                                    {{ $p->kecamatan->nama }}
                                 </span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 font-medium">
-                            <a href="{{ route('admin.paud.show', $p) }}" class="text-sky-700 hover:underline">{{ $p->nama }}</a>
-                        </td>
-                        <td class="px-4 py-3">{{ $p->npsn ?? '-' }}</td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex items-center gap-2">
-                                <span class="h-3 w-3 rounded-full ring-1 ring-slate-300" style="background-color: {{ $p->kecamatan->warna }}"></span>
-                                {{ $p->kecamatan->nama }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">{{ $p->kelurahan ?? '-' }}</td>
-                        <td class="px-4 py-3">
-                            @if ($p->punyaKoordinat())
-                                <span class="text-emerald-700"><i class="fa-solid fa-circle-check"></i> Ada</span>
-                            @else
-                                <span class="text-amber-700"><i class="fa-solid fa-circle-minus"></i> Belum</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center justify-end gap-2">
-                                <a href="{{ route('admin.paud.show', $p) }}"
-                                   class="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-2 font-medium text-slate-700 hover:bg-slate-200">
-                                    <i class="fa-solid fa-eye"></i> Lihat
-                                </a>
-                                <a href="{{ route('admin.paud.edit', $p) }}"
-                                   class="inline-flex items-center gap-1 rounded-lg bg-sky-100 px-3 py-2 font-medium text-sky-800 hover:bg-sky-200">
-                                    <i class="fa-solid fa-pen"></i> Ubah
-                                </a>
-                                <form method="POST" action="{{ route('admin.paud.destroy', $p) }}"
-                                      onsubmit="return confirm(@js('Hapus PAUD ' . $p->nama . '? Semua fotonya ikut terhapus dan tidak bisa dikembalikan.'))">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                            class="inline-flex items-center gap-1 rounded-lg bg-red-100 px-3 py-2 font-medium text-red-700 hover:bg-red-200">
-                                        <i class="fa-solid fa-trash"></i> Hapus
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="px-4 py-10 text-center text-slate-500">
-                            @if ($adaFilter)
-                                Tidak ada PAUD yang cocok dengan pencarian atau filter ini.
-                            @else
-                                Data PAUD belum tersedia. Klik "Tambah PAUD" untuk memasukkan data.
-                            @endif
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                            </td>
+
+                            <td class="px-4 py-3 text-slate-600">{{ $p->kelurahan ?? '-' }}</td>
+
+                            <td class="px-4 py-3">
+                                @if ($p->punyaKoordinat())
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
+                                        <i class="fa-solid fa-circle-check"></i> Ada
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                                        <i class="fa-solid fa-circle-minus"></i> Belum
+                                    </span>
+                                @endif
+                            </td>
+
+                            <td class="px-4 py-3">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a href="{{ route('admin.paud.show', $p) }}" title="Lihat detail" aria-label="Lihat detail {{ $p->nama }}"
+                                       class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.paud.edit', $p) }}" title="Ubah data" aria-label="Ubah {{ $p->nama }}"
+                                       class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-100 text-sky-700 transition hover:bg-sky-200">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <form method="POST" action="{{ route('admin.paud.destroy', $p) }}"
+                                          onsubmit="return confirm(@js('Hapus PAUD ' . $p->nama . '? Semua fotonya ikut terhapus dan tidak bisa dikembalikan.'))">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" title="Hapus" aria-label="Hapus {{ $p->nama }}"
+                                                class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100 text-red-600 transition hover:bg-red-200">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-4 py-14 text-center">
+                                @include('admin.paud._kosong', ['adaFilter' => $adaFilter])
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="mt-4">
-        {{ $daftar->links() }}
+    {{-- 4. Kartu (HP) --}}
+    <div class="mt-5 space-y-3 md:hidden">
+        @forelse ($daftar as $p)
+            <article class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                <div class="flex items-start gap-3">
+                    @if ($p->fotoUtama)
+                        <img src="{{ $p->fotoUtama->url }}" alt="Foto {{ $p->nama }}" loading="lazy"
+                             class="h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-slate-200">
+                    @else
+                        <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xl text-slate-400">
+                            <i class="fa-regular fa-image"></i>
+                        </span>
+                    @endif
+
+                    <div class="min-w-0 flex-1">
+                        <a href="{{ route('admin.paud.show', $p) }}" class="block font-semibold leading-snug text-slate-800">{{ $p->nama }}</a>
+                        <div class="mt-1 flex flex-wrap items-center gap-1.5">
+                            @if ($p->jenis_satuan)
+                                <span class="rounded-md bg-violet-100 px-2 py-0.5 text-[11px] font-bold text-violet-700">{{ $p->jenis_satuan }}</span>
+                            @endif
+                            @if ($p->status)
+                                <span class="rounded-md px-2 py-0.5 text-[11px] font-bold {{ $p->status === 'Negeri' ? 'bg-sky-100 text-sky-700' : 'bg-amber-100 text-amber-700' }}">{{ $p->status }}</span>
+                            @endif
+                            @if ($p->punyaKoordinat())
+                                <span class="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">Ada koordinat</span>
+                            @else
+                                <span class="rounded-md bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">Belum ada koordinat</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                    <div>
+                        <dt class="text-slate-400">NPSN</dt>
+                        <dd class="font-mono text-slate-700">{{ $p->npsn ?? '-' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-400">Kelurahan</dt>
+                        <dd class="text-slate-700">{{ $p->kelurahan ?? '-' }}</dd>
+                    </div>
+                    <div class="col-span-2">
+                        <dt class="text-slate-400">Kecamatan</dt>
+                        <dd class="inline-flex items-center gap-2 text-slate-700">
+                            <span class="h-2.5 w-2.5 rounded-full ring-1 ring-slate-300" style="background-color: {{ $p->kecamatan->warna }}"></span>
+                            {{ $p->kecamatan->nama }}
+                        </dd>
+                    </div>
+                </dl>
+
+                <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
+                    <a href="{{ route('admin.paud.show', $p) }}"
+                       class="flex-1 rounded-lg bg-slate-100 py-2 text-center text-sm font-medium text-slate-700">
+                        <i class="fa-solid fa-eye mr-1"></i> Lihat
+                    </a>
+                    <a href="{{ route('admin.paud.edit', $p) }}"
+                       class="flex-1 rounded-lg bg-sky-100 py-2 text-center text-sm font-medium text-sky-800">
+                        <i class="fa-solid fa-pen mr-1"></i> Ubah
+                    </a>
+                    <form method="POST" action="{{ route('admin.paud.destroy', $p) }}" class="flex-1"
+                          onsubmit="return confirm(@js('Hapus PAUD ' . $p->nama . '? Semua fotonya ikut terhapus dan tidak bisa dikembalikan.'))">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="w-full rounded-lg bg-red-100 py-2 text-sm font-medium text-red-700">
+                            <i class="fa-solid fa-trash mr-1"></i> Hapus
+                        </button>
+                    </form>
+                </div>
+            </article>
+        @empty
+            <div class="rounded-2xl bg-white px-4 py-12 text-center shadow-sm ring-1 ring-slate-200">
+                @include('admin.paud._kosong', ['adaFilter' => $adaFilter])
+            </div>
+        @endforelse
     </div>
+
+    {{-- 5. Halaman --}}
+    <div class="mt-5">
+        {{ $daftar->links('pagination.admin') }}
+    </div>
+
+    <script>
+        // Pilihan kecamatan/koordinat langsung menyaring tanpa menekan tombol Cari
+        document.querySelectorAll('[data-auto-kirim]').forEach(function (pilihan) {
+            pilihan.addEventListener('change', function () {
+                document.getElementById('form-filter').submit();
+            });
+        });
+    </script>
 @endsection
