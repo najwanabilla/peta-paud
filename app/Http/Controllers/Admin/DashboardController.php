@@ -50,10 +50,10 @@ class DashboardController extends Controller
             'perJenis' => $perJenis,
             'jenisKosong' => $jenisKosong,
             'paudTerbaru' => Paud::with('kecamatan:id,nama,warna')
-                ->latest()
-                ->orderByDesc('id')
-                ->limit(5)
-                ->get(),
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get(),
         ]);
     }
 }
