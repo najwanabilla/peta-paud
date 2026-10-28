@@ -4,22 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Models\Paud;
 use App\Models\Kecamatan;
-use Illuminate\Http\Request;
 
 class PublicController extends Controller
 {
-    public function index()
+    // Halaman Dashboard / Beranda
+    public function beranda()
     {
-        $kecamatan = Kecamatan::all();
-        // We can load PAUDs as JSON directly for the map
-        $pauds = Paud::with('kecamatan')->get();
+        $totalPaud = Paud::count();
+        $totalKecamatan = Kecamatan::count();
+        $totalKelurahan = Paud::whereNotNull('kelurahan')->distinct('kelurahan')->count('kelurahan');
+
+        // Data Grafik Kecamatan
+        $grafikKecamatan = Paud::select('kecamatan_id')
+            ->selectRaw('count(*) as total')
+            ->groupBy('kecamatan_id')
+            ->with('kecamatan')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'nama' => $item->kecamatan ? $item->kecamatan->nama : 'Lainnya',
+                    'total' => $item->total
+                ];
+            });
+
+        // Data Grafik Jenis
+        $grafikJenis = Paud::select('jenis_satuan')
+            ->selectRaw('count(*) as total')
+            ->whereNotNull('jenis_satuan')
+            ->groupBy('jenis_satuan')
+            ->get();
+
+        return view('public.beranda', compact('totalPaud', 'totalKecamatan', 'totalKelurahan', 'grafikKecamatan', 'grafikJenis'));
+    }
+
+    // Halaman Peta Interaktif
+    public function peta()
+    {
+        // Ambil data Kecamatan untuk Dropdown Filter
+        $kecamatan = Kecamatan::orderBy('nama')->get();
+        
+        // Ambil data PAUD yang punya koordinat beserta relasi kecamatannya
+        $pauds = Paud::with('kecamatan')
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get();
         
         return view('public.peta', compact('kecamatan', 'pauds'));
-    }
-    
-    // Optional: detail page
-    public function show(Paud $paud)
-    {
-        return view('public.detail', compact('paud'));
     }
 }
