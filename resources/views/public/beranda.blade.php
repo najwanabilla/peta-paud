@@ -1,146 +1,500 @@
+
 @extends('layouts.public')
 
-@section('judul', 'Beranda - Peta PAUD Balikpapan')
+@section('judul', 'Peta PAUD Balikpapan')
 
 @push('styles')
 <style>
-    /* Animasi Fade In Up untuk Kartu */
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(30px); }
-        to { opacity: 1; transform: translateY(0); }
+    :root {
+        --paud-blue: #2563eb;
+        --paud-text: #1e293b;
+        --paud-muted: #64748b;
     }
-    .animasi-kartu { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; }
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.3s; }
-    .delay-3 { animation-delay: 0.5s; }
+
+    /* BAGIAN ATAS */
+    .home-hero {
+        background:
+            radial-gradient(ellipse at 8% 12%, rgba(219, 234, 254, .65), transparent 42%),
+            linear-gradient(
+                110deg,
+                #ffffff 0%,
+                #f8fbff 45%,
+                #eff6ff 75%,
+                #ecfdf5 100%
+            );
+    }
+
+    .hero-content {
+        max-width: 1240px;
+        margin-inline: auto;
+    }
+
+    /* KOTAK PENCARIAN */
+    .search-panel {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 1240px;
+        margin-inline: auto;
+        padding: 30px;
+        background: rgba(255, 255, 255, .97);
+        border: 1px solid #e2eaf5;
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(37, 99, 235, .06);
+    }
+
+    .search-field {
+        min-width: 0;
+    }
+
+    .search-field label {
+        display: block;
+        margin-bottom: 9px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .search-control {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        height: 54px;
+        padding: 0 15px;
+        color: var(--paud-text);
+        background: #fff;
+        border: 1px solid #d8e2f0;
+        border-radius: 12px;
+        outline: none;
+        font-family: inherit;
+        font-size: 14px;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .search-control::placeholder {
+        color: #94a3b8;
+    }
+
+    .search-control:hover {
+        border-color: #b9cbed;
+    }
+
+    .search-control:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, .10);
+    }
+
+    .search-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        height: 54px;
+        padding: 0 16px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #fff;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 5px 12px rgba(37, 99, 235, .14);
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .search-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, .20);
+    }
+
+    .reset-link {
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .reset-link:hover {
+        color: #1e40af;
+    }
+
+    /* TOMBOL TAUTAN CEPAT */
+    .quick-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        padding: 12px 18px;
+        border: 1px solid #dbe5f2;
+        border-radius: 999px;
+        background: #fff;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all .2s;
+    }
+
+    .quick-link:hover {
+        transform: translateY(-2px);
+        border-color: #bfdbfe;
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .quick-link-green {
+        border-color: #d1fae5;
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .quick-link-green:hover {
+        border-color: #a7f3d0;
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    /* BAGIAN BAWAH: PUTIH KE BIRU MUDA */
+    .home-section {
+        background: linear-gradient(
+            110deg,
+            #ffffff 0%,
+            #ffffff 15%,
+            #fdfdff 28%,
+            #f8fbff 43%,
+            #f1f6ff 60%,
+            #e6efff 82%,
+            #dbeafe 100%
+        );
+    }
+
+    .section-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 13px;
+        border: 1px solid #dbeafe;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+    }
+
+    /* KARTU JENIS SEKOLAH */
+    .jenis-card {
+        display: block;
+        box-sizing: border-box;
+        height: 100%;
+        padding: 25px;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, .88);
+        text-decoration: none;
+        transition:
+            transform .2s,
+            box-shadow .2s,
+            border-color .2s;
+    }
+
+    .jenis-card:hover {
+        transform: translateY(-4px);
+        border-color: #bfdbfe;
+        box-shadow: 0 12px 28px rgba(51, 91, 145, .09);
+    }
+
+    .jenis-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        margin-bottom: 19px;
+        border-radius: 15px;
+        font-size: 21px;
+    }
+
+    .jenis-arrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        transition: gap .2s;
+    }
+
+    .jenis-card:hover .jenis-arrow {
+        gap: 12px;
+    }
+
+    .jenis-card:focus-visible,
+    .quick-link:focus-visible,
+    .search-button:focus-visible {
+        outline: 3px solid #93c5fd;
+        outline-offset: 3px;
+    }
+
+    @media (max-width: 640px) {
+        .search-panel {
+            padding: 19px;
+            border-radius: 18px;
+        }
+
+        .jenis-card {
+            padding: 20px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .jenis-card,
+        .search-button,
+        .quick-link,
+        .jenis-arrow {
+            transition: none;
+        }
+    }
 </style>
 @endpush
 
 @section('isi')
-    <!-- Bagian Hero -->
-    <div class="bg-sky-700 text-white py-16 px-4 shadow-inner relative overflow-hidden">
-        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        
-        <div class="max-w-5xl mx-auto relative z-10 text-center animasi-kartu">
-            <h1 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight">Peta Sebaran PAUD Balikpapan</h1>
-            <p class="text-lg text-sky-100 mb-8 max-w-2xl mx-auto">
-                Jelajahi data Pendidikan Anak Usia Dini (PAUD) di Kota Balikpapan. Temukan lokasi, profil, dan rute menuju sekolah dengan mudah.
-            </p>
-            <a href="{{ route('peta') }}" class="inline-flex items-center gap-2 bg-white text-sky-700 font-bold px-8 py-3.5 rounded-full shadow-lg hover:bg-slate-100 hover:scale-105 transition-transform text-lg">
-                <i class="fa-solid fa-map-location-dot"></i> Buka Peta Interaktif
-            </a>
-        </div>
-    </div>
+<div class="min-h-screen bg-white">
 
-    <!-- Bagian Statistik (Animasi Angka) -->
-    <div class="max-w-5xl mx-auto w-full px-4 -mt-10 relative z-20">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Total PAUD -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 flex items-center gap-5 border border-slate-100 animasi-kartu delay-1">
-                <div class="bg-sky-100 text-sky-600 p-4 rounded-xl text-3xl"><i class="fa-solid fa-school"></i></div>
-                <div>
-                    <p class="text-slate-500 text-sm font-semibold tracking-wide uppercase">Total PAUD</p>
-                    <h3 class="text-4xl font-extrabold text-slate-800"><span class="counter" data-target="{{ $totalPaud }}">0</span></h3>
-                </div>
-            </div>
-            <!-- Kecamatan -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 flex items-center gap-5 border border-slate-100 animasi-kartu delay-2">
-                <div class="bg-emerald-100 text-emerald-600 p-4 rounded-xl text-3xl"><i class="fa-solid fa-map-location-dot"></i></div>
-                <div>
-                    <p class="text-slate-500 text-sm font-semibold tracking-wide uppercase">Kecamatan</p>
-                    <h3 class="text-4xl font-extrabold text-slate-800"><span class="counter" data-target="{{ $totalKecamatan }}">0</span></h3>
-                </div>
-            </div>
-            <!-- Kelurahan -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 flex items-center gap-5 border border-slate-100 animasi-kartu delay-3">
-                <div class="bg-amber-100 text-amber-600 p-4 rounded-xl text-3xl"><i class="fa-solid fa-location-dot"></i></div>
-                <div>
-                    <p class="text-slate-500 text-sm font-semibold tracking-wide uppercase">Kelurahan</p>
-                    <h3 class="text-4xl font-extrabold text-slate-800"><span class="counter" data-target="{{ $totalKelurahan }}">0</span></h3>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- BAGIAN ATAS DAN PENCARIAN --}}
+    <section class="home-hero px-5 py-14 md:py-20">
+        <div class="hero-content">
 
-    <!-- Bagian Grafik -->
-    <div class="max-w-5xl mx-auto w-full px-4 py-12 animasi-kartu delay-3">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
-                <h3 class="font-bold text-lg mb-6 text-slate-800 border-l-4 border-sky-500 pl-3">Sebaran per Kecamatan</h3>
-                <div class="relative h-72 w-full">
-                    <canvas id="chartKecamatan"></canvas>
-                </div>
+            <div class="mb-10 text-center">
+                <span class="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm">
+                    <i class="fa-solid fa-location-dot"></i>
+                    Peta PAUD Balikpapan
+                </span>
+
+                <h1 class="mt-6 text-3xl font-extrabold leading-tight tracking-tight text-slate-800 sm:text-4xl md:text-5xl">
+                    Temukan Sekolah PAUD
+                    <span class="text-blue-600">Pilihanmu</span>
+                </h1>
+
+                <p class="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-500 md:text-lg">
+                    Jelajahi informasi sekolah PAUD di Kota Balikpapan.
+                    Cari berdasarkan nama, kecamatan, dan jenis sekolah.
+                </p>
             </div>
-            <div class="bg-white rounded-2xl shadow-lg p-6 border border-slate-100">
-                <h3 class="font-bold text-lg mb-6 text-slate-800 border-l-4 border-emerald-500 pl-3">Komposisi Jenis PAUD</h3>
-                <div class="relative h-72 w-full flex justify-center">
-                    <canvas id="chartJenis"></canvas>
+
+            {{-- KOTAK PENCARIAN --}}
+            <form action="{{ route('paud.index') }}" method="GET" class="search-panel">
+
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </div>
+
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">
+                            Cari Sekolah PAUD
+                        </h2>
+                        <p class="mt-1 text-sm text-slate-500">
+                            Atur pencarian sesuai kebutuhanmu.
+                        </p>
+                    </div>
                 </div>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+
+                    {{-- NAMA SEKOLAH --}}
+                    <div class="search-field">
+                        <label for="q">Nama Sekolah</label>
+                        <input
+                            id="q"
+                            name="q"
+                            type="text"
+                            value="{{ request('q') }}"
+                            placeholder="Contoh: TK Melati"
+                            class="search-control"
+                        >
+                    </div>
+
+                    {{-- KECAMATAN --}}
+                    <div class="search-field">
+                        <label for="kecamatan">Pilih Kecamatan</label>
+                        <select
+                            id="kecamatan"
+                            name="kecamatan"
+                            class="search-control"
+                        >
+                            <option value="">Semua Kecamatan</option>
+
+                            @foreach ($kecamatans as $kecamatan)
+                                <option
+                                    value="{{ $kecamatan->slug }}"
+                                    @selected(request('kecamatan') === $kecamatan->slug)
+                                >
+                                    {{ $kecamatan->nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- JENIS SEKOLAH --}}
+                    <div class="search-field">
+                        <label for="jenis">Jenis Sekolah</label>
+                        <select id="jenis" name="jenis" class="search-control">
+                            <option value="">Semua Jenis</option>
+
+                            @foreach (\App\Models\Paud::JENIS_SATUAN as $kode => $namaJenis)
+                                <option
+                                    value="{{ $kode }}"
+                                    @selected(request('jenis') === $kode)
+                                >
+                                    {{ $namaJenis }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- TOMBOL CARI --}}
+                    <div class="search-field flex flex-col justify-end">
+                        <label class="invisible hidden xl:block" aria-hidden="true">
+                            Cari sekolah
+                        </label>
+
+                        <button type="submit" class="search-button">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Cari Sekolah
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="mt-5 flex flex-col justify-between gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center">
+                    <p class="text-sm leading-6 text-slate-500">
+                        <i class="fa-solid fa-circle-info mr-1 text-blue-500"></i>
+                        Pilih kecamatan atau jenis sekolah untuk mempersempit pencarian.
+                    </p>
+
+                    <a href="{{ route('beranda') }}" class="reset-link shrink-0">
+                        <i class="fa-solid fa-rotate-left mr-1"></i>
+                        Reset pencarian
+                    </a>
+                </div>
+
+            </form>
+
+            {{-- TAUTAN CEPAT --}}
+            <div class="mt-7 flex flex-wrap justify-center gap-3">
+                <a href="{{ route('paud.index') }}" class="quick-link">
+                    <i class="fa-solid fa-school"></i>
+                    Lihat Semua Sekolah
+                </a>
+
+                <a href="{{ route('peta') }}" class="quick-link quick-link-green">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                    Lihat Peta Sebaran
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    {{-- BAGIAN BAWAH: JENIS SEKOLAH --}}
+    <section class="home-section px-5 py-14 md:py-20">
+        <div class="mx-auto max-w-7xl">
+
+            <div class="mb-10 text-center">
+                <span class="section-label">
+                    <i class="fa-solid fa-shapes"></i>
+                    PILIHAN SEKOLAH
+                </span>
+
+                <h2 class="mt-4 text-2xl font-extrabold text-slate-800 md:text-3xl">
+                    Jelajahi Jenis Sekolah
+                </h2>
+
+                <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500 md:text-base">
+                    Pilih kategori sekolah untuk melihat daftar PAUD yang tersedia di Balikpapan.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+
+                {{-- TK --}}
+                <a href="{{ route('paud.index', ['jenis' => 'TK']) }}" class="jenis-card">
+                    <div class="jenis-icon bg-blue-50 text-blue-600">
+                        <i class="fa-solid fa-shapes"></i>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-slate-800">TK</h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                        Taman Kanak-kanak untuk mendukung perkembangan dan kesiapan belajar anak.
+                    </p>
+
+                    <div class="jenis-arrow mt-5 text-blue-600">
+                        Lihat sekolah
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                {{-- KB --}}
+                <a href="{{ route('paud.index', ['jenis' => 'KB']) }}" class="jenis-card">
+                    <div class="jenis-icon bg-emerald-50 text-emerald-600">
+                        <i class="fa-solid fa-puzzle-piece"></i>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-slate-800">KB</h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                        Kelompok Bermain dengan kegiatan belajar yang menyenangkan melalui permainan.
+                    </p>
+
+                    <div class="jenis-arrow mt-5 text-emerald-600">
+                        Lihat sekolah
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                {{-- TPA --}}
+                <a href="{{ route('paud.index', ['jenis' => 'TPA']) }}" class="jenis-card">
+                    <div class="jenis-icon bg-sky-50 text-sky-600">
+                        <i class="fa-solid fa-child-reaching"></i>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-slate-800">TPA</h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                        Taman Penitipan Anak yang mendukung pengasuhan dan perkembangan anak.
+                    </p>
+
+                    <div class="jenis-arrow mt-5 text-sky-600">
+                        Lihat sekolah
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </a>
+
+                {{-- SPS --}}
+                <a href="{{ route('paud.index', ['jenis' => 'SPS']) }}" class="jenis-card">
+                    <div class="jenis-icon bg-teal-50 text-teal-600">
+                        <i class="fa-solid fa-seedling"></i>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-slate-800">SPS</h3>
+
+                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                        Satuan PAUD Sejenis untuk mendukung pendidikan anak usia dini.
+                    </p>
+
+                    <div class="jenis-arrow mt-5 text-teal-600">
+                        Lihat sekolah
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </a>
+
             </div>
         </div>
-    </div>
+    </section>
+
+    {{-- BANNER BIRU BESAR DI BAWAH SUDAH DIHAPUS --}}
+
+</div>
 @endsection
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Animasi Angka
-    const counters = document.querySelectorAll('.counter');
-    const speed = 200;
-    counters.forEach(counter => {
-        const updateCount = () => {
-            const target = +counter.getAttribute('data-target');
-            const count = +counter.innerText;
-            const inc = target / speed;
-            if (count < target) {
-                counter.innerText = Math.ceil(count + inc);
-                setTimeout(updateCount, 15);
-            } else {
-                counter.innerText = target;
-            }
-        };
-        updateCount();
-    });
-
-    // Grafik
-    const dataKecamatan = @json($grafikKecamatan);
-    const dataJenis = @json($grafikJenis);
-
-    new Chart(document.getElementById('chartKecamatan').getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: dataKecamatan.map(item => item.nama.replace('Balikpapan ', 'Bpp. ')),
-            datasets: [{
-                label: 'Jumlah PAUD',
-                data: dataKecamatan.map(item => item.total),
-                backgroundColor: '#0ea5e9',
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            animation: { duration: 2000, easing: 'easeOutQuart' },
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
-        }
-    });
-
-    new Chart(document.getElementById('chartJenis').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: dataJenis.map(item => item.jenis_satuan),
-            datasets: [{
-                data: dataJenis.map(item => item.total),
-                backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444'],
-                borderWidth: 4, borderColor: '#ffffff', hoverOffset: 10
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            animation: { animateScale: true, animateRotate: true, duration: 2000 },
-            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } },
-            cutout: '75%'
-        }
-    });
-</script>
-@endpush

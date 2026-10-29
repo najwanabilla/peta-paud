@@ -1,63 +1,74 @@
-<<<<<<< HEAD
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Peta PAUD Balikpapan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Website untuk menampilkan persebaran dan informasi PAUD (Pendidikan Anak Usia Dini) di Kota Balikpapan, dengan peta interaktif, pencarian, halaman detail, dan panel admin.
 
-## About Laravel
+Dibuat bertahap (10 tahap). Seluruh teknologi gratis dan open-source. Biaya hanya untuk hosting dan domain saat peluncuran.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Teknologi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel 13 + PHP 8.3 atau lebih baru
+- MySQL / MariaDB
+- Blade, Tailwind CSS, JavaScript (Vite)
+- Leaflet + OpenStreetMap (peta dasar)
+- Font Awesome Free (ikon)
+- Geoapify (routing, kunci API gratis, dipakai lewat server)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Status pengerjaan
 
-## Learning Laravel
+| Tahap | Isi | Status |
+|---|---|---|
+| 1 | Analisis dan perencanaan | Selesai |
+| 2 | Persiapan lingkungan | Selesai |
+| 3 | Database dan model | Selesai |
+| 4 | Login admin, dashboard, kecamatan | Berjalan (belum teruji penuh) |
+| 5 | CRUD PAUD dan foto | Kode ada (belum teruji penuh) |
+| 6 | Impor Excel | Importer sudah ada di repo, belum ditinjau |
+| 7 | Halaman publik | Beranda dan peta ada; daftar PAUD dan detail PAUD belum |
+| 8 | Peta interaktif dan petunjuk arah | Halaman peta ada, belum ditinjau; rute Geoapify belum |
+| 9 | Integrasi dan pengujian | Belum dikerjakan |
+| 10 | Deployment | Belum dikerjakan |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Cara menjalankan di komputer sendiri
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Prasyarat: PHP 8.3+ (ekstensi `intl`, `zip`, `gd`, `pdo_mysql` aktif), Composer, Node.js, MySQL/MariaDB (misalnya XAMPP), Git.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <alamat-repo>
+cd <nama-folder>
+composer install
+npm install
+copy .env.example .env      # di Mac/Linux: cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+1. Buat database kosong bernama `peta_paud` (collation `utf8mb4_unicode_ci`).
+2. Buka `.env`, isi `DB_USERNAME` dan `DB_PASSWORD` sesuai MySQL-mu.
+3. Isi `ADMIN_EMAIL` dan `ADMIN_PASSWORD` (minimal 12 karakter) untuk akun admin pertama.
+4. Isi `GEOAPIFY_API_KEY` dengan kunci milikmu sendiri (buat gratis di geoapify.com).
 
-## Contributing
+```bash
+php artisan migrate --seed
+php artisan storage:link
+npm run dev          # terminal 1
+php artisan serve    # terminal 2
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Buka `http://127.0.0.1:8000`. Login admin ada di `/masuk`, panel di `/admin`.
 
-## Code of Conduct
+## Aturan proyek
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Jangan memakai layanan berbayar, API berbayar, atau plugin premium.
+- Jangan mengarang data PAUD, NPSN, alamat, koordinat, foto, atau batas wilayah. Koordinat boleh kosong.
+- Jangan commit file `.env`, kunci API, atau password. Kunci hanya di `.env`.
+- Nama folder dan file view memakai huruf kecil semua (hosting Linux membedakan huruf besar dan kecil).
+- Data uji diberi awalan "DATA UJI" dan harus dihapus sebelum peluncuran.
+- Ganti password admin sementara sebelum website dipublikasikan.
+- Permintaan rute ke Geoapify harus lewat server Laravel, bukan langsung dari browser.
 
-## Security Vulnerabilities
+## Yang perlu diselesaikan
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-=======
-# peta-paud
-Website Peta Lokasi PAUD
->>>>>>> 5332df3213152266eddbfedffeb6f37902cacf0c
+- Tinjau importer Excel dan "patch koordinat otomatis": koordinat yang janggal tidak boleh ditebak.
+- Lengkapi halaman publik: daftar PAUD (pencarian, filter, paginasi) dan detail PAUD.
+- Pasang rute Geoapify lewat server di halaman peta.
+- Pagination dan pesan validasi bawaan Laravel masih berbahasa Inggris di beberapa tempat.
+- Uji menyeluruh sebelum deployment.
