@@ -11,6 +11,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+// --- TAMBAHAN UNTUK FITUR EXPORT ---
+use App\Exports\PaudExport;
+use Maatwebsite\Excel\Facades\Excel;
+// -----------------------------------
+
 class PaudController extends Controller
 {
     public function __construct(private FotoPaudService $layananFoto)
@@ -49,6 +54,16 @@ class PaudController extends Controller
             'adaFilter' => $kata !== '' || filled($kecamatanId) || filled($koordinat),
         ]);
     }
+
+    // --- METHOD EXPORT ---
+    public function export(Request $request)
+    {
+        $namaFile = 'Data-PAUD-Balikpapan-' . date('d-m-Y') . '.xlsx';
+        
+        // Memanggil class PaudExport dengan membawa parameter request untuk filter
+        return Excel::download(new PaudExport($request), $namaFile);
+    }
+    // ---------------------
 
     public function create(): View
     {

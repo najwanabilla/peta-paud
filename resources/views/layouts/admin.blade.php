@@ -80,15 +80,17 @@
                 Kecamatan
             </a>
 
-            {{-- Impor Excel --}}
-            <span
-                class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-3 text-sky-200/70"
-                title="Dikerjakan di Tahap 6"
+            {{-- TAMBAHAN: Export Data PAUD --}}
+            <a
+                href="{{ route('admin.paud.export') }}"
+                class="flex items-center gap-3 rounded-lg px-3 py-3 {{ $menuBiasa }}"
+                title="Unduh semua data PAUD ke Excel"
             >
-                <i class="fa-solid fa-file-excel w-5 text-center"></i>
-                Impor Excel
-                <small class="ml-auto">Segera</small>
-            </span>
+                <i class="fa-solid fa-file-export w-5 text-center"></i>
+                Export Data PAUD
+            </a>
+
+          
         </nav>
 
         {{-- Informasi akun --}}

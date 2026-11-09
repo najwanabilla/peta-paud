@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -42,6 +41,11 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     Route::resource('kecamatan', KecamatanController::class)
         ->except(['show']);
+
+    // --- TAMBAHAN ROUTE EXPORT EXCEL ---
+    // Diletakkan sebelum Route::resource agar tidak dianggap sebagai ID PAUD
+    Route::get('paud/export', [PaudController::class, 'export'])->name('paud.export');
+    // -----------------------------------
 
     Route::resource('paud', PaudController::class);
 

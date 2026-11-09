@@ -6,152 +6,127 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+    /* Warna dan ukuran penting ditulis langsung di sini, supaya tetap tampil
+       walaupun kelas Tailwind belum ter-build. */
     .font-playful { font-family: 'Nunito', sans-serif; }
 
-    .hero-section {
-        background-color: #f0f7ff;
+    .hero-tegas {
+        min-height: calc(100vh - 4rem);
+        color: #ffffff;
+        background-color: #1e3a8a;
         background-image:
-            radial-gradient(circle at 85% 10%, rgba(191, 219, 254, 0.85) 0%, transparent 50%),
-            radial-gradient(circle at 5% 95%, rgba(224, 242, 254, 0.9) 0%, transparent 45%);
+            radial-gradient(rgba(255, 255, 255, 0.10) 1.5px, transparent 1.5px),
+            linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 60%, #312e81 100%);
+        background-size: 26px 26px, auto;
     }
 
-    .titik-peta {
-        background-image: radial-gradient(rgba(255, 255, 255, 0.28) 1.5px, transparent 1.5px);
-        background-size: 22px 22px;
-    }
+    .label-tegas { color: #fde047; letter-spacing: 0.2em; }
+    .judul-tegas { color: #ffffff; font-weight: 900; line-height: 1.05; letter-spacing: -0.02em; font-size: clamp(2.6rem, 6vw, 4.5rem); }
+    .judul-tegas span { color: #fde047; }
+    .paragraf-tegas { color: #dbeafe; }
 
-    .card-lift { transition: transform .25s ease, box-shadow .25s ease; }
-    .card-lift:hover { transform: translateY(-4px); box-shadow: 0 18px 30px -12px rgba(15, 23, 42, .18); }
+    .tombol-kuning { background: #facc15; color: #0f172a; }
+    .tombol-kuning:hover { background: #fde047; }
+
+    .angka-tegas dt { color: #bfdbfe; }
+    .angka-tegas dd { color: #ffffff; margin: 0; }
+
+    .siluet { filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.35)); }
 </style>
 @endpush
 
 @section('isi')
 @php
-    // Idealnya angka ini dikirim dari controller. Ditaruh di sini supaya langsung jalan.
+    // Catatan: idealnya angka ini dikirim dari controller. Dibiarkan di sini supaya langsung jalan.
     $totalPaud       = \App\Models\Paud::count();
     $jumlahKelurahan = \App\Models\Paud::whereNotNull('kelurahan')->distinct()->count('kelurahan');
-    $perKecamatan    = \App\Models\Paud::selectRaw('kecamatan_id, COUNT(*) as n')->groupBy('kecamatan_id')->pluck('n', 'kecamatan_id');
-    $perJenis        = \App\Models\Paud::selectRaw('jenis_satuan, COUNT(*) as n')->groupBy('jenis_satuan')->pluck('n', 'jenis_satuan');
-    $terbanyak       = max(1, (int) $perKecamatan->max());
 
-    // Warna jenis disamakan dengan legenda di halaman peta
-    $jenisWarna = ['KB' => 'bg-blue-500', 'TK' => 'bg-red-500', 'TPA' => 'bg-emerald-500', 'SPS' => 'bg-purple-500'];
+    // Hiasan peta: posisi titik hanya perkiraan (dekoratif)
+    $titikHiasan = [
+        [235, 430],
+        [265, 400],
+        [215, 455],
+        [265, 445],
+        [310, 420],
+        [350, 430],
+        [335, 380],
+        [410, 400],
+        [450, 365],
+        [385, 440],
+        [295, 365],
+        [275, 320],
+        [320, 290],
+        [365, 320],
+        [315, 345],
+        [240, 350],
+        [215, 300],
+        [185, 255],
+        [240, 275],
+        [150, 205],
+        [140, 320],
+        [260, 185],
+        [190, 170],
+        [310, 230],
+        [365, 200],
+        [275, 245],
+        [250, 90],
+        [490, 300],
+        [435, 315],
+        [520, 225],
+        [500, 345],
+    ];
 @endphp
 
-<div class="font-playful bg-white">
+<section class="font-playful hero-tegas relative flex items-center overflow-hidden px-5 py-14 md:py-20">
+    <div class="relative mx-auto grid w-full max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
 
-    {{-- HERO --}}
-    <section class="hero-section px-5 pb-20 pt-12 md:pb-24 md:pt-16">
-        <div class="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+        {{-- KIRI: pesan utama + satu tombol --}}
+        <div>
+            <p class="label-tegas mb-5 text-sm font-extrabold uppercase">Peta PAUD Kota Balikpapan</p>
 
-            <div>
-                <span class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-1.5 text-sm font-bold text-blue-700 shadow-sm">
-                    <i class="fa-solid fa-location-dot text-blue-500"></i>
-                    Sistem Informasi PAUD Balikpapan
-                </span>
+            <h1 class="judul-tegas">
+                Temukan PAUD<br>
+                Terdekat di<br>
+                <span>Balikpapan.</span>
+            </h1>
 
-                <h1 class="mb-4 text-4xl font-black leading-tight tracking-tight text-slate-800 sm:text-5xl">
-                    Cari Sekolah PAUD<br>
-                    <span class="text-blue-600">Dekat Rumahmu</span>
-                </h1>
+            <p class="paragraf-tegas mt-6 max-w-lg text-lg font-semibold leading-relaxed">
+                Lihat lokasi {{ number_format($totalPaud, 0, ',', '.') }} PAUD di seluruh kecamatan, lengkap dengan profil sekolah dan petunjuk jalan.
+            </p>
 
-                <p class="mb-8 max-w-xl text-lg font-semibold text-slate-500">
-                    Temukan ratusan PAUD di Balikpapan dengan mudah. Dilengkapi peta lokasi, profil sekolah, dan petunjuk jalan.
-                </p>
+            <a href="{{ route('peta') }}"
+               class="tombol-kuning group mt-10 inline-flex items-center gap-3 rounded-2xl px-9 py-5 text-lg font-black shadow-2xl transition active:scale-95">
+                <i class="fa-solid fa-map-location-dot text-xl"></i>
+                Buka Peta Sebaran
+                <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+            </a>
 
-                {{-- PENCARIAN --}}
-                <div class="max-w-xl rounded-2xl border border-slate-100 bg-white p-4 shadow-xl shadow-blue-900/5 sm:p-5">
-                    <form action="{{ route('paud.index') }}" method="GET" class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-                        <div>
-                            <label for="q" class="mb-1.5 block text-sm font-bold text-slate-700">Nama Sekolah</label>
-                            <input id="q" name="q" type="text" value="{{ request('q') }}" placeholder="Ketik nama..."
-                                   class="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100">
-                        </div>
-
-                        <div>
-                            <label for="kecamatan" class="mb-1.5 block text-sm font-bold text-slate-700">Kecamatan</label>
-                            <select id="kecamatan" name="kecamatan"
-                                    class="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-700 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100">
-                                <option value="">Semua Kecamatan</option>
-                                @foreach ($kecamatans as $kecamatan)
-                                    <option value="{{ $kecamatan->slug }}" @selected(request('kecamatan') === $kecamatan->slug)>{{ $kecamatan->nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <button type="submit"
-                                class="flex h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 font-bold text-white transition-colors hover:bg-blue-700">
-                            <i class="fa-solid fa-magnifying-glass"></i> Cari
-                        </button>
-                    </form>
+            <dl class="angka-tegas mt-12 flex flex-wrap gap-x-10 gap-y-4 pt-6" style="border-top: 1px solid rgba(255,255,255,.25)">
+                <div>
+                    <dt class="text-xs font-extrabold uppercase tracking-widest">PAUD</dt>
+                    <dd class="text-3xl font-black">{{ number_format($totalPaud, 0, ',', '.') }}</dd>
                 </div>
-
-                {{-- JENIS (jalan pintas) --}}
-                <div class="mt-5 flex max-w-xl flex-wrap items-center gap-2">
-                    <span class="mr-1 text-sm font-bold text-slate-500">Jenis:</span>
-                    @foreach (\App\Models\Paud::JENIS_SATUAN as $kode => $namaJenis)
-                        <a href="{{ route('paud.index', ['jenis' => $kode]) }}" title="{{ $namaJenis }}"
-                           class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-sm font-extrabold text-slate-700 transition-colors hover:border-blue-300 hover:text-blue-700">
-                            <span class="h-2.5 w-2.5 rounded-full {{ $jenisWarna[$kode] ?? 'bg-slate-400' }}"></span>
-                            {{ $kode }}
-                            <span class="font-bold text-slate-400">{{ number_format($perJenis[$kode] ?? 0, 0, ',', '.') }}</span>
-                        </a>
-                    @endforeach
+                <div>
+                    <dt class="text-xs font-extrabold uppercase tracking-widest">Kecamatan</dt>
+                    <dd class="text-3xl font-black">{{ $kecamatans->count() }}</dd>
                 </div>
-
-                <a href="{{ route('peta') }}"
-                   class="mt-6 inline-flex items-center gap-2 rounded-xl border-2 border-blue-600 px-5 py-2.5 text-sm font-extrabold text-blue-700 transition-colors hover:bg-blue-600 hover:text-white">
-                    <i class="fa-solid fa-map-location-dot"></i> Lihat Peta Sebaran
-                </a>
-            </div>
-
-            {{-- ILUSTRASI (dekoratif) --}}
-            <div class="mx-auto hidden w-full max-w-md lg:block" aria-hidden="true">
-                <div class="titik-peta relative aspect-square overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 shadow-2xl shadow-blue-600/25">
-                    <span class="absolute left-[16%] top-[20%] flex h-11 w-11 items-center justify-center rounded-full bg-white text-blue-500 shadow-lg"><i class="fa-solid fa-location-dot"></i></span>
-                    <span class="absolute right-[18%] top-[16%] flex h-10 w-10 items-center justify-center rounded-full bg-white text-red-500 shadow-lg"><i class="fa-solid fa-location-dot"></i></span>
-                    <span class="absolute bottom-[22%] right-[12%] flex h-11 w-11 items-center justify-center rounded-full bg-white text-emerald-500 shadow-lg"><i class="fa-solid fa-location-dot"></i></span>
-                    <span class="absolute bottom-[18%] left-[14%] flex h-10 w-10 items-center justify-center rounded-full bg-white text-purple-500 shadow-lg"><i class="fa-solid fa-location-dot"></i></span>
-
-                    <div class="absolute inset-x-10 top-1/2 -translate-y-1/2 rounded-2xl bg-white p-5 text-center shadow-2xl">
-                        <div class="text-4xl font-black text-blue-600">{{ number_format($totalPaud, 0, ',', '.') }}</div>
-                        <div class="text-sm font-bold text-slate-500">PAUD tersebar di {{ $jumlahKelurahan }} kelurahan</div>
-                    </div>
+                <div>
+                    <dt class="text-xs font-extrabold uppercase tracking-widest">Kelurahan</dt>
+                    <dd class="text-3xl font-black">{{ $jumlahKelurahan }}</dd>
                 </div>
-            </div>
-
+            </dl>
         </div>
-    </section>
 
-    {{-- PER KECAMATAN --}}
-    <section class="bg-slate-50 px-5 py-16">
-        <div class="mx-auto max-w-6xl">
-            <div class="mb-8 text-center">
-                <h2 class="text-3xl font-black text-slate-800">Jelajahi per Kecamatan</h2>
-                <p class="mt-2 font-semibold text-slate-500">Lihat PAUD yang ada di wilayah terdekat Anda.</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($kecamatans as $kec)
-                    @php $n = (int) ($perKecamatan[$kec->id] ?? 0); @endphp
-                    <a href="{{ route('paud.index', ['kecamatan' => $kec->slug]) }}"
-                       class="card-lift rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                        <div class="flex items-center justify-between gap-3">
-                            <div class="flex items-center gap-2.5">
-                                <span class="h-3 w-3 rounded-full" style="background: {{ $kec->warna }}"></span>
-                                <h3 class="font-extrabold text-slate-800">{{ $kec->nama }}</h3>
-                            </div>
-                            <i class="fa-solid fa-arrow-right text-sm text-slate-400"></i>
-                        </div>
-                        <p class="mt-3 text-sm font-semibold text-slate-500"><span class="text-xl font-black text-slate-800">{{ $n }}</span> PAUD</p>
-                        <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
-                            <div class="h-full rounded-full" style="width: {{ round($n / $terbanyak * 100) }}%; background: {{ $kec->warna }}"></div>
-                        </div>
-                    </a>
+        {{-- KANAN: siluet Balikpapan (hiasan) --}}
+        <div class="mx-auto w-full max-w-sm lg:max-w-md" aria-hidden="true">
+            <svg viewBox="0 0 612 500" class="siluet h-auto w-full">
+                <path d="M1 71 L1 77 L9 94 L9 98 L0 114 L6 122 L10 140 L22 149 L39 143 L39 153 L43 158 L57 162 L71 179 L81 179 L87 183 L90 183 L91 194 L95 202 L106 214 L111 226 L114 249 L123 266 L127 279 L127 285 L121 295 L119 310 L116 315 L118 322 L124 327 L123 330 L125 334 L118 346 L118 351 L121 356 L131 358 L141 366 L149 366 L152 363 L152 359 L160 345 L158 337 L165 334 L166 328 L171 325 L177 326 L180 322 L187 328 L185 331 L174 337 L173 353 L176 357 L177 363 L195 364 L190 370 L188 368 L180 368 L171 372 L168 376 L168 382 L178 398 L189 403 L198 403 L201 408 L198 416 L184 413 L184 435 L181 439 L184 452 L178 459 L175 468 L164 476 L162 481 L163 484 L170 489 L174 499 L212 492 L239 493 L263 484 L280 489 L288 487 L305 487 L317 483 L320 486 L323 486 L325 484 L336 483 L343 479 L349 479 L372 468 L376 461 L388 460 L431 438 L452 423 L469 406 L485 398 L496 388 L505 383 L509 378 L509 372 L513 364 L517 366 L530 354 L559 337 L567 330 L588 297 L592 280 L600 263 L600 234 L611 212 L601 199 L574 187 L562 186 L551 189 L538 184 L520 181 L516 177 L510 177 L502 170 L490 167 L477 150 L461 142 L450 139 L430 141 L422 138 L419 134 L425 120 L412 114 L406 105 L398 105 L394 103 L387 90 L375 83 L372 73 L367 66 L366 52 L362 47 L351 47 L345 43 L336 42 L323 32 L312 33 L295 39 L278 39 L267 32 L250 29 L245 20 L234 19 L231 13 L228 13 L217 23 L206 25 L198 32 L187 31 L184 34 L182 32 L175 31 L166 37 L160 25 L154 20 L146 17 L138 10 L125 6 L118 1 L107 0 L102 2 L97 9 L94 34 L79 63 L72 65 L68 73 L65 73 L55 67 L41 64 L33 64 L29 69 L26 69 L7 55Z" fill="#ffffff" stroke="#93c5fd" stroke-width="4" stroke-linejoin="round"/>
+                @foreach ($titikHiasan as [$x, $y])
+                    <circle cx="{{ $x }}" cy="{{ $y }}" r="10" fill="#facc15" stroke="#1e3a8a" stroke-width="4"/>
                 @endforeach
-            </div>
+            </svg>
         </div>
-    </section>
 
-</div>
+    </div>
+</section>
 @endsection
