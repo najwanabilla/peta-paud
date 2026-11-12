@@ -147,11 +147,10 @@
 @push('scripts')
 <script>
 (function () {
-    // ===== Data dari server (hanya kolom yang dibutuhkan peta) =====
+    // ===== Data dari server =====
     const DATA_PAUD = @json($pauds);
     const DATA_KECAMATAN = @json($kecamatan->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'warna' => $k->warna])->values());
     const TOTAL_PAUD = @json($totalPaud);
-    // Tautan detail hanya aktif kalau rute halaman detail sudah ada
     const URL_DETAIL = @json(\Illuminate\Support\Facades\Route::has('paud.show') ? route('paud.show', ['paud' => '__SLUG__']) : null);
 
     const WARNA_JENIS = { KB: '#3b82f6', TK: '#ef4444', TPA: '#10b981', SPS: '#a855f7' };
@@ -160,6 +159,7 @@
     const PUSAT_AWAL = [116.85, -1.25];
     const ZOOM_AWAL = 11;
 
+    // Pastikan data koordinat valid
     const semuaPaud = DATA_PAUD.map(function (p) {
         return {
             id: Number(p.id),
@@ -171,11 +171,12 @@
             lat: Number(p.lat),
             lng: Number(p.lng)
         };
-    }).filter(function (p) { return Number.isFinite(p.lat) && Number.isFinite(p.lng); });
+    }).filter(function (p) { 
+        return !isNaN(p.lat) && !isNaN(p.lng) && p.lat !== null && p.lng !== null; 
+    });
 
     const paudPerId = new Map(semuaPaud.map(function (p) { return [p.id, p]; }));
 
-    // Warna gelembung kecamatan diambil dari database (sama dengan panel admin)
     const warnaKecamatan = DATA_KECAMATAN.length > 0
         ? ['match', ['get', 'kec_id']].concat(
             DATA_KECAMATAN.flatMap(function (k) { return [k.id, k.warna]; }),
@@ -197,9 +198,7 @@
     const elTombolFilter = document.getElementById('tombol-filter');
 
     function kosong() { return { type: 'FeatureCollection', features: [] }; }
-
     function adalahHP() { return window.innerWidth < 768; }
-
     function bukaPanelDiHP() {
         if (adalahHP()) {
             elPanel.classList.remove('hidden');
@@ -207,7 +206,6 @@
         }
     }
 
-    // ===== Popup (dibangun dengan DOM, bukan HTML mentah, supaya aman dari XSS) =====
     function buatPopup(p) {
         const wadah = document.createElement('div');
         wadah.className = 'font-sans';
@@ -269,7 +267,6 @@
             .addTo(map);
     }
 
-    // ===== Daftar PAUD pada kecamatan yang diklik/dipilih =====
     function tutupDaftar() {
         kecamatanDaftarId = null;
         document.getElementById('daftar-kecamatan').classList.add('hidden');
@@ -312,19 +309,12 @@
             tombol.appendChild(nama);
             tombol.addEventListener('click', function () {
                 map.flyTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 15.5), duration: 1000 });
-                bukaPopup(p);
+                setTimeout(function() { bukaPopup(p); }, 500);
             });
 
             li.appendChild(tombol);
             ul.appendChild(li);
         });
-
-        if (daftar.length > 100) {
-            const li = document.createElement('li');
-            li.className = 'px-2 py-1 text-xs text-slate-500';
-            li.textContent = 'dan ' + (daftar.length - 100) + ' lainnya. Persempit dengan kolom pencarian.';
-            ul.appendChild(li);
-        }
 
         document.getElementById('daftar-kecamatan').classList.remove('hidden');
     }
@@ -335,16 +325,15 @@
 
         const batas = new maplibregl.LngLatBounds([daftar[0].lng, daftar[0].lat], [daftar[0].lng, daftar[0].lat]);
         daftar.forEach(function (p) { batas.extend([p.lng, p.lat]); });
-        map.fitBounds(batas, { padding: 80, maxZoom: 15, duration: 1200 });
+        map.fitBounds(batas, { padding: 80, maxZoom: 15, duration: 1000, essential: true });
     }
 
     function resetTampilan() {
         if (popupAktif) popupAktif.remove();
         tutupDaftar();
-        map.flyTo({ center: PUSAT_AWAL, zoom: ZOOM_AWAL, duration: 1200 });
+        map.flyTo({ center: PUSAT_AWAL, zoom: ZOOM_AWAL, duration: 1500 });
     }
 
-    // ===== Peta =====
     function initMap() {
         if (map) map.remove();
 
@@ -375,7 +364,7 @@
         map.addSource('source-paud', { type: 'geojson', data: kosong() });
         map.addSource('source-kec', { type: 'geojson', data: kosong() });
 
-        // Gelembung kecamatan (terlihat sampai zoom 12)
+        // Layer Gelembung Kecamatan (Besar)
         map.addLayer({
             id: 'kec-circles',
             type: 'circle',
@@ -388,7 +377,8 @@
                 'circle-stroke-width': 5,
                 'circle-stroke-color': '#ffffff',
                 'circle-blur': 0.1,
-                'circle-translate': [0, -2]
+                'circle-translate': [0, -2],
+                'circle-radius-transition': { duration: 300, delay: 0 }
             }
         });
 
@@ -413,7 +403,7 @@
             paint: { 'text-color': '#1e293b', 'text-halo-color': '#ffffff', 'text-halo-width': 3 }
         });
 
-        // Titik PAUD (terlihat mulai zoom 12)
+        // Layer Titik PAUD (Kecil) - Dipastikan ada di atas
         map.addLayer({
             id: 'paud-points',
             type: 'circle',
@@ -430,19 +420,35 @@
     }
 
     function pasangInteraksi() {
+        // Klik titik PAUD
+        map.on('click', 'paud-points', function (e) {
+            if (e.features && e.features.length > 0) {
+                const featureId = e.features[0].properties.id;
+                const p = paudPerId.get(Number(featureId));
+                if (p) {
+                    bukaPopup(p);
+                }
+            }
+        });
+
+        // Klik gelembung kecamatan
         map.on('click', 'kec-circles', function (e) {
             const kecId = Number(e.features[0].properties.kec_id);
             tampilkanDaftarKecamatan(kecId);
-            fokusKecamatan(kecId);
             bukaPanelDiHP();
         });
 
-        map.on('click', 'paud-points', function (e) {
-            const p = paudPerId.get(Number(e.features[0].properties.id));
-            if (p) bukaPopup(p);
+        map.on('mouseenter', 'kec-circles', function () {
+            map.getCanvas().style.cursor = 'pointer';
+            map.setPaintProperty('kec-circles', 'circle-radius', ['interpolate', ['linear'], ['get', 'total'], 1, 26, 50, 40, 100, 55]); 
         });
 
-        ['kec-circles', 'paud-points'].forEach(function (lapisan) {
+        map.on('mouseleave', 'kec-circles', function () {
+            map.getCanvas().style.cursor = '';
+            map.setPaintProperty('kec-circles', 'circle-radius', ['interpolate', ['linear'], ['get', 'total'], 1, 22, 50, 35, 100, 50]);
+        });
+
+        ['paud-points'].forEach(function (lapisan) {
             map.on('mouseenter', lapisan, function () { map.getCanvas().style.cursor = 'pointer'; });
             map.on('mouseleave', lapisan, function () { map.getCanvas().style.cursor = ''; });
         });
@@ -501,9 +507,33 @@
         perbaruiSumber();
 
         if (kecamatanDaftarId !== null) tampilkanDaftarKecamatan(kecamatanDaftarId);
+
+        // FITUR BARU: Auto Zoom & Buka Popup saat mencari nama sekolah
+        if (kata !== '' && hasilFilter.length > 0) {
+            if (hasilFilter.length <= 5) {
+                // Jika hasil sedikit, zoom ke area sekolah
+                fokusKecamatan(hasilFilter[0].kecamatan_id);
+                
+                // Jika hanya 1 sekolah yang ketemu, langsung buka popup-nya!
+                if (hasilFilter.length === 1) {
+                    setTimeout(function() {
+                        map.flyTo({ 
+                            center: [hasilFilter[0].lng, hasilFilter[0].lat], 
+                            zoom: 16, 
+                            duration: 1000 
+                        });
+                        bukaPopup(hasilFilter[0]);
+                    }, 500);
+                }
+            } else {
+                // Jika hasil banyak, zoom-out agar semua kelihatan
+                const batas = new maplibregl.LngLatBounds();
+                hasilFilter.forEach(function (p) { batas.extend([p.lng, p.lat]); });
+                map.fitBounds(batas, { padding: 80, maxZoom: 15, duration: 1000, essential: true });
+            }
+        }
     }
 
-    // Catatan transparansi: PAUD yang tidak punya titik lokasi valid tidak ditampilkan
     (function () {
         const tidakTampil = TOTAL_PAUD - semuaPaud.length;
         const el = document.getElementById('catatan-jumlah');
