@@ -26,9 +26,25 @@
         background: linear-gradient(120deg, #eaf5ff 0%, #f4f8ff 55%, #e8f8f0 100%);
     }
 
+    /* Style baru untuk input dan select agar lebih rapi */
+    .filter-input {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        padding-top: 0.85rem;
+        padding-bottom: 0.85rem;
+        padding-left: 2.75rem;
+        padding-right: 1rem;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
     .filter-input:focus {
-        border-color: #60a5fa;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, .10);
+        border-color: #3b82f6;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, .1);
     }
 </style>
 @endpush
@@ -65,7 +81,6 @@
             <div class="relative z-10 flex flex-col items-center justify-between gap-7 md:flex-row">
 
                 <div class="max-w-2xl">
-
                     <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-bold text-blue-700 shadow-sm">
                         <i class="fa-solid fa-graduation-cap"></i>
                         PENDIDIKAN ANAK USIA DINI
@@ -80,7 +95,6 @@
                         Temukan informasi sekolah PAUD di Kota Balikpapan.
                         Pilih sekolah yang sesuai dan lihat informasi lengkapnya.
                     </p>
-
                 </div>
 
                 {{-- ILUSTRASI --}}
@@ -97,109 +111,80 @@
 
         </section>
 
-        {{-- PENCARIAN DAN FILTER --}}
-        <section class="mt-7 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-
-            <div class="mb-5">
-                <h2 class="text-lg font-bold text-slate-800">
-                    Temukan Sekolah
-                </h2>
-                <p class="mt-1 text-sm text-slate-500">
-                    Cari berdasarkan nama, kecamatan, atau jenis sekolah.
-                </p>
+        {{-- PENCARIAN DAN FILTER (DIRAPIKAN) --}}
+        <section class="mt-7 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            
+            <div class="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <i class="fa-solid fa-filter"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">Temukan Sekolah</h2>
+                    <p class="text-sm text-slate-500">Gunakan kolom di bawah untuk menyaring data.</p>
+                </div>
             </div>
 
             <form action="{{ route('paud.index') }}" method="GET">
-
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-12">
+                    
                     {{-- PENCARIAN --}}
-                    <div>
-                        <label for="q" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Nama atau alamat sekolah
-                        </label>
-
+                    <div class="md:col-span-5 lg:col-span-5">
+                        <label for="q" class="mb-2 block text-sm font-bold text-slate-700">Nama atau Alamat</label>
                         <div class="relative">
                             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-
-                            <input
-                                id="q"
-                                type="text"
-                                name="q"
-                                value="{{ $kataKunci }}"
-                                placeholder="Cari nama sekolah..."
-                                class="filter-input w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm outline-none transition"
-                            >
+                            <input id="q" type="text" name="q" value="{{ $kataKunci }}" placeholder="Ketik nama sekolah..." class="filter-input">
                         </div>
                     </div>
 
                     {{-- KECAMATAN --}}
-                    <div>
-                        <label for="kecamatan" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Kecamatan
-                        </label>
-
-                        <select
-                            id="kecamatan"
-                            name="kecamatan"
-                            class="filter-input w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition"
-                        >
-                            <option value="">Semua Kecamatan</option>
-
-                            @foreach ($kecamatans as $kecamatan)
-                                <option
-                                    value="{{ $kecamatan->slug }}"
-                                    @selected($kecamatanTerpilih === $kecamatan->slug)
-                                >
-                                    {{ $kecamatan->nama }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <div class="md:col-span-3 lg:col-span-3">
+                        <label for="kecamatan" class="mb-2 block text-sm font-bold text-slate-700">Kecamatan</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-map-location-dot absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <select id="kecamatan" name="kecamatan" class="filter-input appearance-none">
+                                <option value="">Semua Kecamatan</option>
+                                @foreach ($kecamatans as $kecamatan)
+                                    <option value="{{ $kecamatan->slug }}" @selected($kecamatanTerpilih === $kecamatan->slug)>
+                                        {{ $kecamatan->nama }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- JENIS --}}
-                    <div>
-                        <label for="jenis" class="mb-2 block text-sm font-semibold text-slate-700">
-                            Jenis sekolah
-                        </label>
+                    <div class="md:col-span-2 lg:col-span-2">
+                        <label for="jenis" class="mb-2 block text-sm font-bold text-slate-700">Jenis</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-school absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <select id="jenis" name="jenis" class="filter-input appearance-none">
+                                <option value="">Semua</option>
+                                @foreach (\App\Models\Paud::JENIS_SATUAN as $kode => $namaJenis)
+                                    <option value="{{ $kode }}" @selected($jenisTerpilih === $kode)>
+                                        {{ $kode }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
 
-                        <select
-                            id="jenis"
-                            name="jenis"
-                            class="filter-input w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition"
-                        >
-                            <option value="">Semua Jenis</option>
-
-                            @foreach (\App\Models\Paud::JENIS_SATUAN as $kode => $namaJenis)
-                                <option
-                                    value="{{ $kode }}"
-                                    @selected($jenisTerpilih === $kode)
-                                >
-                                    {{ $namaJenis }}
-                                </option>
-                            @endforeach
-                        </select>
+                    {{-- TOMBOL AKSI --}}
+                    <div class="flex items-end gap-2 md:col-span-2 lg:col-span-2">
+                        <button type="submit" class="flex h-[46px] w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 text-sm font-bold text-white shadow-md shadow-blue-200 transition-all hover:bg-blue-800 active:scale-95">
+                            Cari
+                        </button>
+                        <a href="{{ route('paud.index') }}" title="Reset Filter" class="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-800 active:scale-95">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </a>
                     </div>
 
                 </div>
-
-                {{-- TOMBOL FILTER --}}
-                <div class="mt-5 flex flex-wrap gap-3">
-
-                    <button type="submit"
-                            class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-6 py-3 text-sm font-bold text-white shadow-md shadow-blue-200 transition hover:bg-blue-800">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        Cari Sekolah
-                    </button>
-
-                    <a href="{{ route('paud.index') }}"
-                       class="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
-                        <i class="fa-solid fa-rotate-left"></i>
-                        Reset Filter
-                    </a>
-
-                </div>
-
             </form>
 
         </section>
@@ -248,7 +233,6 @@
             {{-- DAFTAR SEKOLAH --}}
             @if ($pauds->count() > 0)
 
-                {{-- SATU KOLOM / SATU BARIS PENUH --}}
                 <div class="mt-5 flex flex-col gap-3">
 
                     @foreach ($pauds as $sekolah)
@@ -287,14 +271,12 @@
                                 {{ $pauds->firstItem() + $loop->index }}
                             </div>
 
-                            {{-- BAGIAN AVATAR / FOTO (DIMODIFIKASI) --}}
+                            {{-- BAGIAN AVATAR / FOTO --}}
                             @if ($sekolah->fotoUtama)
-                                {{-- Jika ada foto, tampilkan gambar --}}
                                 <div class="school-avatar flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-sm sm:h-[68px] sm:w-[68px] sm:rounded-2xl">
                                     <img src="{{ $sekolah->fotoUtama->url }}" alt="{{ $sekolah->nama }}" class="h-full w-full object-cover">
                                 </div>
                             @else
-                                {{-- Jika tidak ada foto, tetap tampilkan inisial seperti desain asli --}}
                                 <div class="school-avatar flex h-12 w-12 shrink-0 items-center justify-center rounded-xl {{ $warna['bg'] }} {{ $warna['text'] }} shadow-sm sm:h-[68px] sm:w-[68px] sm:rounded-2xl">
                                     <span class="text-lg font-extrabold tracking-wide sm:text-2xl">
                                         {{ $inisial }}

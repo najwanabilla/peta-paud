@@ -239,21 +239,14 @@
         const aksi = document.createElement('div');
         aksi.className = 'flex border-t border-slate-100 bg-slate-50';
 
+        // HANYA MENAMPILKAN TOMBOL DETAIL (Petunjuk arah dihapus)
         if (URL_DETAIL && p.slug) {
             const detail = document.createElement('a');
             detail.href = URL_DETAIL.replace('__SLUG__', encodeURIComponent(p.slug));
-            detail.className = 'flex-1 border-r border-slate-200 py-2.5 text-center text-xs font-bold text-sky-700 hover:bg-sky-100';
-            detail.textContent = 'Detail';
+            detail.className = 'flex-1 py-2.5 text-center text-xs font-bold text-sky-700 hover:bg-sky-100';
+            detail.textContent = 'Lihat Detail Profil';
             aksi.appendChild(detail);
         }
-
-        const arah = document.createElement('a');
-        arah.href = 'https://www.openstreetmap.org/directions?route=' + encodeURIComponent(';' + p.lat + ',' + p.lng);
-        arah.target = '_blank';
-        arah.rel = 'noopener';
-        arah.className = 'flex-1 py-2.5 text-center text-xs font-bold text-emerald-700 hover:bg-emerald-100';
-        arah.textContent = 'Petunjuk arah';
-        aksi.appendChild(arah);
 
         wadah.appendChild(aksi);
         return wadah;

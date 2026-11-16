@@ -79,13 +79,29 @@
         background: #f1f5f9;
     }
 
-    .back-link {
-        color: #475569;
-        transition: color .2s ease;
+    /* Desain Tombol Kembali (Hanya Teks Biru) */
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #1d4ed8; /* Warna teks biru */
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s ease;
     }
 
-    .back-link:hover {
-        color: #1d4ed8;
+    .btn-back:hover {
+        color: #1e3a8a; /* Biru lebih gelap saat di-hover */
+    }
+
+    .btn-back i {
+        font-size: 14px;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-back:hover i {
+        transform: translateX(-4px); /* Ikon panah bergeser saat di-hover */
     }
 
     .direction-link {
@@ -153,15 +169,12 @@
 <div class="detail-page px-4 py-6 sm:px-6 sm:py-8">
     <main class="detail-container">
 
-        {{-- Navigasi --}}
-        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <a href="{{ route('paud.index', ['jenis' => $paud->jenis_satuan]) }}"
-               class="back-link inline-flex items-center gap-2 text-sm font-medium">
+        {{-- Navigasi (Hanya Teks Biru) --}}
+        <div class="mb-6">
+            <a href="{{ route('paud.index', ['jenis' => $paud->jenis_satuan]) }}" class="btn-back">
                 <i class="fa-solid fa-arrow-left"></i>
-                Kembali ke daftar PAUD
+                Kembali ke Daftar PAUD
             </a>
-
-            <span class="text-xs text-slate-400">Peta PAUD / Detail sekolah</span>
         </div>
 
         {{-- Profil sekolah --}}
