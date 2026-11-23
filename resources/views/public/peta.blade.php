@@ -312,13 +312,35 @@
         document.getElementById('daftar-kecamatan').classList.remove('hidden');
     }
 
+    // === FUNGSI YANG DIPERBAIKI BIAR SMOOTH ===
     function fokusKecamatan(kecId) {
         const daftar = hasilFilter.filter(function (p) { return p.kecamatan_id === kecId; });
         if (daftar.length === 0) return;
 
+        // Jika hanya ada 1 PAUD, langsung flyTo ke titiknya
+        if (daftar.length === 1) {
+            map.flyTo({ 
+                center: [daftar[0].lng, daftar[0].lat], 
+                zoom: 15.5, 
+                duration: 1500, 
+                essential: true 
+            });
+            return;
+        }
+
         const batas = new maplibregl.LngLatBounds([daftar[0].lng, daftar[0].lat], [daftar[0].lng, daftar[0].lat]);
         daftar.forEach(function (p) { batas.extend([p.lng, p.lat]); });
-        map.fitBounds(batas, { padding: 80, maxZoom: 15, duration: 1000, essential: true });
+
+        // Hitung titik tengah dari semua sekolah di kecamatan tersebut
+        const pusat = batas.getCenter();
+        
+        // Gunakan flyTo dengan durasi 2 detik agar pergerakan sangat halus (smooth)
+        map.flyTo({
+            center: pusat,
+            zoom: 14.5, // Zoom level yang pas untuk lihat sebaran kecamatan
+            duration: 2000, 
+            essential: true
+        });
     }
 
     function resetTampilan() {
@@ -396,7 +418,7 @@
             paint: { 'text-color': '#1e293b', 'text-halo-color': '#ffffff', 'text-halo-width': 3 }
         });
 
-        // Layer Titik PAUD (Kecil) - Dipastikan ada di atas
+        // Layer Titik PAUD (Kecil)
         map.addLayer({
             id: 'paud-points',
             type: 'circle',
@@ -428,6 +450,7 @@
         map.on('click', 'kec-circles', function (e) {
             const kecId = Number(e.features[0].properties.kec_id);
             tampilkanDaftarKecamatan(kecId);
+            fokusKecamatan(kecId); // Ini bakal mecahin gelembung dan langsung smooth zoom
             bukaPanelDiHP();
         });
 
