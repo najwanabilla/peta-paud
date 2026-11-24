@@ -482,7 +482,7 @@
                     </div>
 
                 </div>
-     
+
 
                 {{-- KELURAHAN --}}
                 <div class="stat-item">

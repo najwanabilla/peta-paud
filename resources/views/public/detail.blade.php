@@ -315,13 +315,17 @@
         </footer>
     </main>
 </div>
+
 @endsection
 
 {{-- Script peta --}}
 @if ($punyaLokasiValid)
+
     @push('scripts')
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             const latitude = Number(@json($paud->latitude));
             const longitude = Number(@json($paud->longitude));
             const container = document.getElementById('peta-detail');
@@ -340,9 +344,14 @@
                 zoom: 15
             });
 
-            map.addControl(new maplibregl.NavigationControl(), 'top-right');
+            map.addControl(
+                new maplibregl.NavigationControl(),
+                'top-right'
+            );
 
-            new maplibregl.Marker({ color: '#2563eb' })
+            new maplibregl.Marker({
+                color: '#2563eb'
+            })
                 .setLngLat([longitude, latitude])
                 .setPopup(new maplibregl.Popup({ offset: 25 }).setText(@json($paud->nama)))
                 .addTo(map);
@@ -356,5 +365,7 @@
             });
         });
     </script>
+
     @endpush
+
 @endif
