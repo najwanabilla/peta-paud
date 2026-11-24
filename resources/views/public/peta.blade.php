@@ -449,8 +449,15 @@
         // Klik gelembung kecamatan
         map.on('click', 'kec-circles', function (e) {
             const kecId = Number(e.features[0].properties.kec_id);
+            
+            // Tambahan: Paksa dropdown berubah biar sinkron
+            elKecamatan.value = String(kecId);
+            
+            // Terapkan filter berdasarkan dropdown yang baru diubah
+            terapkanFilter(); 
+            
             tampilkanDaftarKecamatan(kecId);
-            fokusKecamatan(kecId); // Ini bakal mecahin gelembung dan langsung smooth zoom
+            fokusKecamatan(kecId); 
             bukaPanelDiHP();
         });
 
